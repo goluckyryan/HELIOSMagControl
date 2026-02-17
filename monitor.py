@@ -5,11 +5,13 @@ import time
 import re
 from datetime import datetime
 
+##  OXFORD 601-048T
+
 # Configuration
 PORT = '/dev/ttyUSB1'
 BAUDRATE = 4800
 TIMEOUT = 1.0           # seconds
-POLL_INTERVAL = 2       # seconds between processed updates
+POLL_INTERVAL = 5       # seconds between processed updates
 LOG_FILE = 'magnet_status_log.csv'
 
 # For tracking previous helium level (simple trend warning)
@@ -40,8 +42,8 @@ def extract_values(clean_text):
     main_match = re.search(r'(\d\.\d{2})\s+(\d+\.\d)\s+(\d{1,3})\s+OK', clean_text)
     if main_match:
         values['He_temp_K'] = main_match.group(1)
-        values['pressure'] = main_match.group(2)
-        values['helium_level_%'] = main_match.group(3)
+        values['helium_level_%'] = 100. - float(main_match.group(2))
+        values['pressure'] = main_match.group(3)
 
     # Power line: "0.0V  485W"
     power_match = re.search(r'0\.0V\s+(\d+)W', clean_text)
@@ -87,7 +89,13 @@ def main():
 
         buffer = ""
         while True:
-            data = ser.read(2048).decode('ascii', errors='ignore')
+            
+            raw = ser.read(2048)
+            # print(f"Read {len(raw)} bytes from serial port")
+            # print(raw)
+            # print("-" * 40)
+
+            data = raw.decode('ascii', errors='ignore')
             if data:
                 buffer += data
 
@@ -141,7 +149,7 @@ def main():
                         prev_helium = helium
                     buffer = ""  # Reset buffer after successful parse
 
-            time.sleep(0.2)  # Prevent tight loop
+            time.sleep(POLL_INTERVAL)  # Prevent tight loop
 
     except serial.SerialException as e:
         print(f"Serial port error: {e}")
