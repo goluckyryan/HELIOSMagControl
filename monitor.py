@@ -31,7 +31,7 @@ def readMagnet():
         if line == '':
             empty = empty + 1
         if empty > 10:
-            return None, lines
+            return None, None
         found = line.find("[11;43H")
         # print(line)
         lines.append(line)
@@ -41,16 +41,21 @@ def readMagnet():
             line[found2+6:found2+6:4] 
             out['level'] = line[found2+6:found2+6+4]
             out['shield'] = line[found+7:found+7+3]
-            return out , lines
+            return out, lines
             break
-        return None, lines
+    return None, None
   except Exception as e:
     print(e)
-    return None, []
+    return None, None
 
 
 if __name__ == "__main__":
     out, lines = readMagnet()
+
+    # print("\n".join(lines))
+    # print("\x1b[24B")
+    # print(repr("\n".join(lines))) # print out the escape charators for debuggings
+
 
     if out is None:
         sys.exit(1)
