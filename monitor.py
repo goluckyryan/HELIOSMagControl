@@ -63,7 +63,19 @@ def WriteDiscordMessage(message: str):
     requests.post(url, json=payload)
   return
 
+def WriteDiscordFile(filepath: str):
+    # Load webhook URL
+    with open('discord.WebHook', 'r') as hook_file:
+        url = hook_file.read().strip()
 
+    with open(filepath, 'rb') as f:
+        files = {
+            'file': (filepath, f)  # (filename, file_object)
+        }
+
+        response = requests.post(url, files=files)
+
+from txt_to_png import render_text_file_to_png
 
 if __name__ == "__main__":
     out, raw = readMagnet()
@@ -75,13 +87,17 @@ if __name__ == "__main__":
     if out is None:
         sys.exit(1)
 
-    lines = parse_raw("\n".join(raw), rows=40, cols=80)
-    # lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
-    # with open("magnet_out.txt", "w", encoding="utf-8") as f:
-    #     f.write("\n".join(lines) + "\n")
+    # write to file
+    lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
+    with open("magnet_out.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+    render_text_file_to_png("magnet_out.txt", "magnet_out.png")
+    WriteDiscordFile("magnet_out.png")
 
     # post magnet_out.txt to discord using webhook
-    WriteDiscordMessage(lines)
+    # lines = parse_raw("\n".join(raw), rows=40, cols=80)
+    # WriteDiscordMessage(lines)
 
 
     level = float(out.get('level', 0))

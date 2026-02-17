@@ -11,3 +11,5 @@
   - Install with: `pip install pyserial`
 - **Permissions:** Ensure the user has read/write access to the serial devices (udev rules or run with sudo).
 
+**Discord**
+- simply create `discord.WebHook`, paste the webHook without anything.
