@@ -1,4 +1,5 @@
 test*
+*.log
 
 __pycache__
 *.csv
