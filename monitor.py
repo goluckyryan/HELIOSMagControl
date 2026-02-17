@@ -8,6 +8,8 @@ from datetime import datetime
 import os
 import sys
 
+from render_raw import parse_raw
+
 ##  OXFORD 601-048T
 
 def readMagnet():
@@ -49,16 +51,38 @@ def readMagnet():
     return None, None
 
 
+import requests
+
+def WriteDiscordMessage(message: str):
+  #load discord webhook
+  with open('discord.WebHook', 'r') as hook_file:
+    webHook = hook_file.read()
+    url = webHook.strip()
+    formatted_message = f"```python\n{message}\n```"
+    payload = {"content": formatted_message}
+    requests.post(url, json=payload)
+  return
+
+
+
 if __name__ == "__main__":
-    out, lines = readMagnet()
+    out, raw = readMagnet()
 
     # print("\n".join(lines))
     # print("\x1b[24B")
     # print(repr("\n".join(lines))) # print out the escape charators for debuggings
 
-
     if out is None:
         sys.exit(1)
+
+    lines = parse_raw("\n".join(raw), rows=40, cols=80)
+    # lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
+    # with open("magnet_out.txt", "w", encoding="utf-8") as f:
+    #     f.write("\n".join(lines) + "\n")
+
+    # post magnet_out.txt to discord using webhook
+    WriteDiscordMessage(lines)
+
 
     level = float(out.get('level', 0))
     temp = float(out.get('shield', 0))
@@ -71,4 +95,6 @@ if __name__ == "__main__":
     os.system(f'curl -s -XPOST "http://192.168.1.193:8086/write?db=testing" --data-binary "HeTemp value={temp}" --max-time 1 --connect-timeout 1')
     # os.system(f'curl -s -XPOST "http://192.168.1.193:8086/write?db=testing" --data-binary "HePressure value={pressure}" --max-time 1 --connect-timeout 1')
 
+
+    
         

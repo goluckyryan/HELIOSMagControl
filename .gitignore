@@ -3,3 +3,6 @@ test*
 
 __pycache__
 *.csv
+
+*WebHook
+magnet_out.txt
