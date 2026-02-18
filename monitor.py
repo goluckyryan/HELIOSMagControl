@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # fix the date in line 2
     now = datetime.now().strftime("%H:%M:%S  %d-%b-%Y")
-    lines[2] = lines[2][:36].ljust(36) + now
+    lines[2] = lines[2][:36]+ now + lines[2][36+len(now):]
 
     with open("magnet_out.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
