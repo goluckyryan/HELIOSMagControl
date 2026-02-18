@@ -78,6 +78,8 @@ def WriteDiscordFile(filepath: str):
 from txt_to_png import render_text_file_to_png
 
 if __name__ == "__main__":
+    
+    os.chdir('/home/helios/HELIOSMagControl')    
     out, raw = readMagnet()
 
     # print("\n".join(lines))
@@ -87,8 +89,14 @@ if __name__ == "__main__":
     if out is None:
         sys.exit(1)
 
+
     # write to file
     lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
+
+    # fix the date in line 2
+    now = datetime.now().strftime("%H:%M:%S  %d-%b-%Y")
+    lines[2] = lines[2][:36].ljust(36) + now
+
     with open("magnet_out.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
 
