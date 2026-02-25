@@ -42,11 +42,11 @@ def run_console():
             # --- START COMMAND MODE ---
             command_mode = True
 
-            sys.stdout.write("\033[25;1H\033[K")
+            sys.stdout.write("\033[20;14H\033[K") # Move cursor to line 20, col 14 and clear line, this is where the command prompt will be.
             sys.stdout.flush()
 
             # print("\n" + "="*30)
-            user_input = input("ENTER COMMAND: ")
+            user_input = input("") # this will wait for "ENTER" to proceed 
             
             if user_input.lower() in ['exit', 'quit']:
                 break
