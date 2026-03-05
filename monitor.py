@@ -14,7 +14,6 @@ from render_raw import parse_raw
 
 def readMagnet():
   try:
-    import time
     out = {}
     commandESC = "\x1B"
     commandr = "\r"
@@ -49,6 +48,9 @@ def readMagnet():
   except Exception as e:
     print(e)
     return None, None
+  finally:
+    if ser and ser.is_open:
+       ser.close()
 
 
 import requests
@@ -78,9 +80,9 @@ def WriteDiscordFile(filepath: str):
 from txt_to_png import render_text_file_to_png
 
 if __name__ == "__main__":
-    
-    os.chdir('/home/helios/HELIOSMagControl')    
-    
+
+    os.chdir('/home/helios/HELIOSMagControl')
+
     while True:
         out, raw = readMagnet()
 
@@ -94,10 +96,15 @@ if __name__ == "__main__":
             print(f"{now} - readMagnet error, retrying in 60 seconds...")
             time.sleep(60)
             continue
-        break
 
-    # write to file
-    lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
+        # prase the raw into simple lines
+        lines = parse_raw("\n".join(raw), rows=40, cols=80).splitlines()
+        if "Platform Magnet Supervisory" not in lines[1]:
+            print(f"{now} - the raw data is fragmented, retry in 60 seconds...")
+            time.sleep(60)
+            continue
+
+        break
 
     # fix the date in line 2
     lines[2] = lines[2][:36]+ now + lines[2][36+len(now):]
