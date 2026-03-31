@@ -21,7 +21,7 @@ import time
 # --- Configuration ---
 PORT = '/dev/ttyUSB1'
 BAUD = 4800
-LOCAL_ECHO = True   # ON: so you can see what you type (Oxford doesn't echo back commands cleanly)
+LOCAL_ECHO = False  # OFF: Oxford echoes back characters itself, local echo causes duplicates
 
 def serial_to_screen(ser):
     """
@@ -85,6 +85,9 @@ def wake_oxford(ser):
     ser.write(b'\r')
     time.sleep(6)
     ser.reset_input_buffer()
+    # Clear screen and home cursor so Oxford's ANSI positioning starts clean
+    sys.stdout.write('\x1b[2J\x1b[H')
+    sys.stdout.flush()
     print("[Wake] Done. Oxford is ready. Type a command (e.g. R) and press Enter.\n", flush=True)
 
 def main():
