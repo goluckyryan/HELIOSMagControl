@@ -2,17 +2,64 @@
 - **Purpose:** Simple serial monitoring and control utilities for magnet/cryogenics and power supply hardware used in the HELIOS setup. Provides a passive monitor for an Oxford 601-048T controller and an interactive console for an Siemens Magnet Power Suppy.
 
 **Files**
-- **Monitor:** [monitor.py](monitor.py) — passive serial monitor/parser for the Oxford unit; writes CSV logs.
+- **Monitor:** [monitor.py](monitor.py) — passive serial monitor/parser for the Oxford unit; posts a status screenshot to Discord, writes He level/temp to InfluxDB, and appends a local CSV record.
 - **MPS Console:** [MPSControl.py](MPSControl.py) — interactive console to view and send commands to a Siemens MPS unit.
 
 **Requirements**
 - **Python:** 3.8+ recommended
-- **Packages:** pyserial
-  - Install with: `pip install pyserial`
+- **Packages:** pyserial, requests, Pillow
+  - Install with: `pip install pyserial requests Pillow`
 - **Permissions:** Ensure the user has read/write access to the serial devices (udev rules or run with sudo).
 
 **Discord**
 - simply create `discord.WebHook`, paste the webHook without anything.
+---
+
+## Running the Monitor
+
+Installed as a cron job (`crontab -e`):
+
+```
+0 7 * * * /home/helios/HELIOSMagControl/monitor.py >> /home/helios/HELIOSMagControl/monitor_cron.log 2>&1
+```
+
+`2>&1` matters: without it only stdout is captured and tracebacks are handed to
+cron's mailer, which discards them when no MTA is installed.
+
+A PID lock at `/tmp/monitor_magpi.pid` prevents overlapping runs. A bad serial
+read is retried up to 5 times at 5 minute intervals; if all attempts fail the
+script alerts Discord and exits non-zero.
+
+### Outputs
+
+| File | Contents |
+|---|---|
+| `he_level.log` | CSV record of every good reading — the fallback if a push fails |
+| `magnet_out.txt` | Parsed status screen, plain text |
+| `magnet_out.png` | Same screen rendered for Discord |
+| `monitor_cron.log` | Run log (stdout + stderr) |
+
+`he_level.log` is written **before** any network push, so a reading survives even
+if both Discord and InfluxDB are unreachable. The header is written once, on
+creation:
+
+```
+timestamp,he_level_percent,shield_temp_k
+2026-09-11 16:18:24,73.2,67.0
+```
+
+### Failure handling
+
+Discord and InfluxDB are on different networks — Discord over the internet,
+InfluxDB on the local `192.168.1.0/24` LAN — so one being down must not affect
+the other. The Discord push is wrapped in `try/except` and every webhook POST
+has a 30 s timeout; a failure is logged and the InfluxDB write still runs.
+
+> Prior to 2026-09-11 the Discord upload was unguarded. When the WiFi uplink
+> dropped on 2026-09-01, the resulting exception killed the script before the
+> InfluxDB write on every run, losing 10 days of He level data even though the
+> InfluxDB server was reachable the whole time.
+
 ---
 
 ## Oxford 601-048T Serial Interface
