@@ -2,17 +2,28 @@
 - **Purpose:** Simple serial monitoring and control utilities for magnet/cryogenics and power supply hardware used in the HELIOS setup. Provides a passive monitor for an Oxford 601-048T controller and an interactive console for an Siemens Magnet Power Suppy.
 
 **Files**
-- **Monitor:** [monitor.py](monitor.py) — passive serial monitor/parser for the Oxford unit; posts a status screenshot to Discord, writes He level/temp to InfluxDB, and appends a local CSV record.
-- **MPS Console:** [MPSControl.py](MPSControl.py) — interactive console to view and send commands to a Siemens MPS unit.
+
+Entry points:
+- **Monitor:** [monitor.py](monitor.py) — passive serial monitor/parser for the Oxford unit; posts a status screenshot to Discord, writes He level/temp to InfluxDB, and appends a local CSV record. Normally run from cron — see [Running the Monitor](#running-the-monitor).
+- **Monitor loop:** [continuous_monitor.sh](continuous_monitor.sh) — runs `monitor.py` on a fixed interval instead of cron. Takes the interval in minutes (default 30); refuses anything under 5.
+- **MPS Console:** [hyperTerminal.py](hyperTerminal.py) — interactive terminal for the Siemens MPS. Raw character-at-a-time pass-through, so the unit owns the screen and its ANSI redraws work. Ctrl+Q to quit.
+- **Oxford Console:** [MonitorTerminal.py](MonitorTerminal.py) — interactive terminal for the Oxford 601-048T, for driving it by hand (`ON`, `OFF`, `DEM`, …) rather than the one-shot `R` scrape that `monitor.py` does. Sends the wake sequence on connect and maps Enter to CR, as the Oxford requires. Ctrl+Q to quit.
+- **Serial Explorer:** [helios_serial_explorer.py](helios_serial_explorer.py) — one-shot diagnostic; sends `R` and dumps the raw response with escape sequences annotated (`<ESC>`, `<CR>`, …). Use when the parsed output looks wrong and you need to see what actually came off the wire.
+
+Supporting modules (imported by `monitor.py`, not run directly):
+- **ANSI parser:** [render_raw.py](render_raw.py) — `parse_raw()` replays the Oxford's ANSI escape stream into a flat 40×80 character grid.
+- **PNG renderer:** [txt_to_png.py](txt_to_png.py) — `render_text_file_to_png()` renders that grid to PNG, preserving the reverse-video highlight. See [PNG Rendering Notes](#png-rendering-notes).
 
 **Requirements**
 - **Python:** 3.8+ recommended
 - **Packages:** pyserial, requests, Pillow
   - Install with: `pip install pyserial requests Pillow`
+- **curl:** required — the InfluxDB write shells out to `curl` rather than using a Python client. Without it the He level and temp writes are lost.
 - **Permissions:** Ensure the user has read/write access to the serial devices (udev rules or run with sudo).
 
 **Discord**
-- simply create `discord.WebHook`, paste the webHook without anything.
+- Create a file named `discord.WebHook` in the repo root containing **only** the webhook URL — no quotes, no surrounding text. It is read with a bare `read().strip()`.
+- Already covered by the `*WebHook` rule in `.gitignore`, so it will not be committed.
 ---
 
 ## Running the Monitor
