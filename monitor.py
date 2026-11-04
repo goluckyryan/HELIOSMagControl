@@ -18,7 +18,7 @@ def readMagnet():
     commandESC = "\x1B"
     commandr = "\r"
     commandR = "R\r"
-    ser = serial.Serial('/dev/ttyUSB1', 4800, timeout=120)
+    ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=120)
     ser.write(commandESC.encode())
     time.sleep(2)
     ser.write(commandr.encode())
