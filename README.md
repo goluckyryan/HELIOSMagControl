@@ -5,7 +5,6 @@
 
 Entry points:
 - **Monitor:** [monitor.py](monitor.py) — passive serial monitor/parser for the Oxford unit; posts a status screenshot to Discord, writes He level/temp to InfluxDB, and appends a local CSV record. Normally run from cron — see [Running the Monitor](#running-the-monitor).
-- **Monitor loop:** [continuous_monitor.sh](continuous_monitor.sh) — runs `monitor.py` on a fixed interval instead of cron. Takes the interval in minutes (default 30); refuses anything under 5.
 - **MPS Console:** [hyperTerminal.py](hyperTerminal.py) — interactive terminal for the Siemens MPS. Raw character-at-a-time pass-through, so the unit owns the screen and its ANSI redraws work. Ctrl+Q to quit.
 - **Oxford Console:** [MonitorTerminal.py](MonitorTerminal.py) — interactive terminal for the Oxford 601-048T, for driving it by hand (`ON`, `OFF`, `DEM`, …) rather than the one-shot `R` scrape that `monitor.py` does. Sends the wake sequence on connect and maps Enter to CR, as the Oxford requires. Ctrl+Q to quit.
 - **Serial Explorer:** [helios_serial_explorer.py](helios_serial_explorer.py) — one-shot diagnostic; sends `R` and dumps the raw response with escape sequences annotated (`<ESC>`, `<CR>`, …). Use when the parsed output looks wrong and you need to see what actually came off the wire.
@@ -75,7 +74,7 @@ has a 30 s timeout; a failure is logged and the InfluxDB write still runs.
 
 ## Oxford 601-048T Serial Interface
 
-- **Port:** `/dev/ttyUSB1`
+- **Port:** `/dev/oxford601`
 - **Baud:** 4800
 - **Protocol:** Send ESC → wait 2s → send CR → wait 6s → flush → send command + CR
 
