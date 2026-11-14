@@ -7,7 +7,7 @@ import tty
 import termios
 
 # --- Configuration ---
-PORT = '/dev/ttyUSB1'
+PORT = '/dev/siemens_mps'
 BAUD = 9600
 # In XP, 'Local Echo' was usually OFF for industrial gear.
 # Local Echo means the program will print back what you type. 

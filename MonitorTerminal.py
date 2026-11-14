@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
 MonitorTerminal.py — Interactive terminal for Oxford 601-048T Magnet Supervisory
-Copied from hyperTerminal.py, adapted for the Oxford monitor on /dev/ttyUSB1.
+Copied from hyperTerminal.py, adapted for the Oxford monitor on /dev/oxford601.
 
 Usage:
     python3 MonitorTerminal.py
@@ -19,7 +19,7 @@ import termios
 import time
 
 # --- Configuration ---
-PORT = '/dev/ttyUSB1'
+PORT = '/dev/oxford601'
 BAUD = 4800
 LOCAL_ECHO = False  # OFF: Oxford echoes back characters itself, local echo causes duplicates
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 HELIOS Magnet Serial Explorer
-Connects to /dev/ttyUSB1 (Oxford 601-048T), sends R command,
+Connects to /dev/oxford601 (Oxford 601-048T), sends R command,
 and dumps the raw response with annotations.
 """
 
@@ -10,7 +10,7 @@ import time
 import sys
 import re
 
-PORT   = '/dev/ttyUSB1'
+PORT   = '/dev/oxford601'
 BAUD   = 4800
 
 def repr_bytes(data: bytes) -> str:
